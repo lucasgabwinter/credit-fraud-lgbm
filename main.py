@@ -5,7 +5,7 @@ from src.schemas import OprInput, PredicaoOutput
 
 app = FastAPI(
     title="API de Predição de Probabilidade de Fraude",
-    description="Serviço de inferência para modelo LightGBM para detecção de Fraude.",
+    description="Modelo LightGBM para detecção de Fraude.",
     version="1.0.0",
 )
 
