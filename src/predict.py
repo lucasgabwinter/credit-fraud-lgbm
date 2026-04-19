@@ -25,7 +25,7 @@ def prever_fraude(nova_opr: dict) -> dict:
     df = pd.DataFrame([nova_opr])
     df = df[colunas_modelo]
 
-    dict_return['prob_fraude'] = modelo_lbm.predict(df.iloc[0])[0]
+    dict_return['prob_fraude'] = modelo_lbm.predict(df)[0]
     dict_return['resultado'] = 'fraude' if dict_return['prob_fraude'] >= threshold else 'nao_fraude'
 
     return dict_return
