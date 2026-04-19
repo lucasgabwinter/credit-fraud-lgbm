@@ -40,7 +40,7 @@ def publish_fraud_alert(result_item):
     Alerta de fraude detectada!
     Código da operação: {result_item['transaction_id']}
     Resultado do modelo: {result_item['prediction']}
-    Probabilidade de Fraude: {result_item['fraud_score']:.4f}
+    Probabilidade de Fraude: {(result_item['fraud_score'] * 100):.4f}%
     Threshold: {result_item['threshold']:.4f}
     Versão do modelo: {result_item['model_version']}
     Processado em: {result_item['processed_at']}
