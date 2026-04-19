@@ -6,6 +6,19 @@ Resources:
    Type: AWS::SQS::Queue
    Properties:
     QueueName: fraud-score-queue
+    VisibilityTimeout: 180
+
+  FraudResultsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: fraud-results
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: transaction_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: transaction_id
+          KeyType: HASH
    
   FraudScoringFunction:
     Type: AWS::Serverless::Function
@@ -15,6 +28,12 @@ Resources:
       MemorySize: 2048
       Architectures:
         - x86_64
+      Environment:
+        Variables:
+          RESULTS_TABLE_NAME: !Ref FraudResultsTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FraudResultsTable
       Events:
         FraudQueueEvent:
           Type: SQS
@@ -35,6 +54,10 @@ Outputs:
   FraudQueueArn:
     Description: ARN da fila SQS
     Value: !GetAtt FraudQueue.Arn
+
+  FraudResultsTableName:
+    Description: Tabela DynamoDB fraud-results
+    Value: !Ref FraudResultsTable
 
   FraudScoringFunctionArn:
     Description: ARN da Lambda

@@ -20,6 +20,7 @@ def prever_fraude(nova_opr: dict) -> dict:
     dict_return = {
         'prob_fraude': 0,
         'resultado': '',
+        'threshold': threshold
     }
 
     df = pd.DataFrame([nova_opr])

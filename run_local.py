@@ -36,3 +36,4 @@ resultado = prever_fraude(opr_json)
 
 print(resultado['prob_fraude'])
 print(resultado['resultado'])
+print(resultado['threshold'])

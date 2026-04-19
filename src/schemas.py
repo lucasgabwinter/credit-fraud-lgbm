@@ -4,6 +4,7 @@ from pydantic import BaseModel, ConfigDict
 class PredicaoOutput(BaseModel):
     prob_fraude: float
     resultado: str
+    threshold: float
 
 class OprInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
