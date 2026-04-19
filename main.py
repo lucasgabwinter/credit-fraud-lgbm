@@ -28,4 +28,4 @@ def predict(opr: OprInput):
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
         logger.exception("Erro interno ao processar predicao")
-        raise HTTPException(status_code=500, detail=f"Erro interno ao processar predicao")
+        raise HTTPException(status_code=500, detail="Erro interno ao processar predicao")
