@@ -11,6 +11,39 @@ O fluxo cobre:
 - persistência dos resultados no DynamoDB
 - envio de alerta por e-mail via SNS quando a predição for `fraude`
 
+```mermaid
+flowchart LR
+    subgraph Training["Offline training"]
+        T1["Notebook<br/>training and validation"]
+        T2["Model artifacts<br/>model, features, threshold, version"]
+        T1 --> T2
+    end
+
+    subgraph Ingestion["Event ingestion"]
+        I1["Transaction simulator<br/>local producer"]
+        Q1["Amazon SQS<br/>transaction queue"]
+        I1 --> Q1
+    end
+
+    subgraph Scoring["Fraud scoring"]
+        L1["AWS Lambda<br/>scoring function"]
+        R1["Inference layer<br/>predict.py"]
+        Q1 --> L1
+        L1 --> R1
+    end
+
+    subgraph Outputs["Outputs and notification"]
+        D1["Amazon DynamoDB<br/>scoring results"]
+        S1["Amazon SNS<br/>fraud alerts"]
+        E1["Email subscriber"]
+        L1 --> D1
+        L1 --> S1
+        S1 --> E1
+    end
+
+    T2 -. load artifacts .-> R1
+```
+
 ## Objetivo
 
 O objetivo do projeto é receber um conjunto de features já transformadas de uma transação, calcular a probabilidade de fraude com um modelo LightGBM e executar ações operacionais a partir do resultado.
@@ -36,7 +69,7 @@ Os principais componentes são:
 
 ### 1. Treinamento do modelo
 
-O processo começa no notebook [notebooks/caderno.ipynb](/Users/lucaswinter/lucas-code/credit-fraud-lgbm/notebooks/caderno.ipynb), onde a base `creditcard.csv` é analisada e o modelo LightGBM é treinado.
+O processo começa no notebook [notebooks/caderno.ipynb](./notebooks/caderno.ipynb), onde a base `creditcard.csv` é analisada e o modelo LightGBM é treinado.
 
 Durante essa etapa, o projeto:
 
@@ -58,14 +91,14 @@ A inferência local usa os artefatos persistidos para calcular:
 - `prob_fraude`: probabilidade estimada de fraude
 - `resultado`: `fraude` ou `nao_fraude`, com base no threshold salvo
 
-A função principal de inferência está em [src/predict.py](/Users/lucaswinter/lucas-code/credit-fraud-lgbm/src/predict.py) e é compartilhada entre os dois pontos de entrada do projeto:
+A função principal de inferência está em `src/predict.py` e é compartilhada entre os dois pontos de entrada do projeto:
 
 - a API FastAPI
 - a função Lambda
 
 ### 3. API local com FastAPI
 
-A API local está em [main.py](/Users/lucaswinter/lucas-code/credit-fraud-lgbm/main.py).
+A API local está em `main.py`.
 
 Ela expõe os endpoints:
 
@@ -111,7 +144,7 @@ O tópico pode ter uma inscrição do tipo `email`, permitindo o envio de um ale
 
 ## Infraestrutura AWS
 
-A infraestrutura é definida em [template.yaml](/Users/lucaswinter/lucas-code/credit-fraud-lgbm/template.yaml) com AWS SAM.
+A infraestrutura é definida em `template.yaml` com AWS SAM.
 
 Os recursos principais são:
 
