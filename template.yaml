@@ -2,15 +2,25 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
 Resources:
+  FraudQueue:
+   Type: AWS::SQS::Queue
+   
   FraudScoringFunction:
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
       Timeout: 30
-      MemorySize: 1024
+      MemorySize: 2048
       Architectures:
         - x86_64
+      Events:
+        FraudQueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt FraudQueue.Arn
+            BatchSize: 1
+
     Metadata:
       Dockerfile: Dockerfile
       DockerContext: .
-      DockerTag: fraud-scoring-python314
+      DockerTag: fraud-scoring-python31
