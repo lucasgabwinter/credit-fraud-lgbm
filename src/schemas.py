@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class PredicaoOutput(BaseModel):
@@ -6,6 +6,8 @@ class PredicaoOutput(BaseModel):
     resultado: str
 
 class OprInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     V1: float
     V2: float
     V3: float
