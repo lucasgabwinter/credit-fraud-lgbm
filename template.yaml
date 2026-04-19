@@ -4,7 +4,7 @@ Transform: AWS::Serverless-2016-10-31
 Parameters:
   AlertEmail:
     Type: String
-    Default: "lucasgabwinter@gmail.com"
+    Default: "seu_email@gmail.com"
     Description: E-mail opcional para receber alertas de fraude via SNS.
 
 Conditions:

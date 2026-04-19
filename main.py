@@ -23,7 +23,9 @@ def health():
 def predict(opr: OprInput):
     try:
         dict_fraude = prever_fraude(opr.model_dump())
-        return PredicaoOutput(prob_fraude=dict_fraude['prob_fraude'], resultado=dict_fraude['resultado'])
+        return PredicaoOutput(prob_fraude=dict_fraude['prob_fraude'],
+                               resultado=dict_fraude['resultado'],
+                               threshold=dict_fraude['threshold'])
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception:
