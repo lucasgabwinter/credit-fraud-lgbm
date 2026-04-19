@@ -7,6 +7,7 @@ s3_prefix = "fraud-severless"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 image_repositories = ["FraudScoringFunction=856364871203.dkr.ecr.sa-east-1.amazonaws.com/fraudseverless6b734042/fraudscoringfunction5823c536repo"]
+parameter_overrides = "AlertEmail=\"lucasgabwinter@gmail.com\""
 
 [default.global.parameters]
 region = "sa-east-1"
