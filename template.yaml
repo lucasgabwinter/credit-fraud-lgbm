@@ -4,6 +4,8 @@ Transform: AWS::Serverless-2016-10-31
 Resources:
   FraudQueue:
    Type: AWS::SQS::Queue
+   Properties:
+    QueueName: fraud-score-queue
    
   FraudScoringFunction:
     Type: AWS::Serverless::Function
@@ -24,3 +26,16 @@ Resources:
       Dockerfile: Dockerfile
       DockerContext: .
       DockerTag: fraud-scoring-python31
+      
+Outputs:
+  FraudQueueUrl:
+    Description: URL da fila SQS
+    Value: !Ref FraudQueue
+
+  FraudQueueArn:
+    Description: ARN da fila SQS
+    Value: !GetAtt FraudQueue.Arn
+
+  FraudScoringFunctionArn:
+    Description: ARN da Lambda
+    Value: !GetAtt FraudScoringFunction.Arn
