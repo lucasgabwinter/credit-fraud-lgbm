@@ -1,11 +1,11 @@
 from pydantic import BaseModel
 
 
-class PredicaoOutout:
+class PredicaoOutput(BaseModel):
     prob_fraude: float
     resultado: str
 
-class ClienteInput(BaseModel):
+class OprInput(BaseModel):
     V1: float
     V2: float
     V3: float
