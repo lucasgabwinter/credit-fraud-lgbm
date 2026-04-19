@@ -1,6 +1,4 @@
-from src.lambda_handler import lambda_handler
-
-event = {
+{
     "transaction_id": "tx_001",
     "features": {
     "V1": -1.271244,
@@ -34,5 +32,3 @@ event = {
     "Amount": 0.01
     }
 }
-
-print(lambda_handler(event, None))
