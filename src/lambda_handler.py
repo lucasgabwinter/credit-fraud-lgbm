@@ -44,7 +44,7 @@ def publish_fraud_alert(result_item):
     Threshold: {result_item['threshold']:.4f}
     Versão do modelo: {result_item['model_version']}
     Processado em: {result_item['processed_at']}
-    Modelo e sistemas criados por Lucas Winter.
+    Modelo e sistema criados por Lucas Winter.
     """.strip()
 
     get_sns_client().publish(
