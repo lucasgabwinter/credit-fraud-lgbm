@@ -1,6 +1,15 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
+Parameters:
+  AlertEmail:
+    Type: String
+    Default: ""
+    Description: E-mail opcional para receber alertas de fraude via SNS.
+
+Conditions:
+  HasAlertEmail: !Not [!Equals [!Ref AlertEmail, ""]]
+
 Resources:
   FraudQueue:
    Type: AWS::SQS::Queue
@@ -19,6 +28,19 @@ Resources:
       KeySchema:
         - AttributeName: transaction_id
           KeyType: HASH
+
+  FraudAlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: fraud-alerts
+
+  FraudAlertsEmailSubscription:
+    Type: AWS::SNS::Subscription
+    Condition: HasAlertEmail
+    Properties:
+      Protocol: email
+      Endpoint: !Ref AlertEmail
+      TopicArn: !Ref FraudAlertsTopic
    
   FraudScoringFunction:
     Type: AWS::Serverless::Function
@@ -31,9 +53,12 @@ Resources:
       Environment:
         Variables:
           RESULTS_TABLE_NAME: !Ref FraudResultsTable
+          SNS_TOPIC_ARN: !Ref FraudAlertsTopic
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref FraudResultsTable
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt FraudAlertsTopic.TopicName
       Events:
         FraudQueueEvent:
           Type: SQS
@@ -58,6 +83,10 @@ Outputs:
   FraudResultsTableName:
     Description: Tabela DynamoDB fraud-results
     Value: !Ref FraudResultsTable
+
+  FraudAlertsTopicArn:
+    Description: ARN do topico SNS de alertas
+    Value: !Ref FraudAlertsTopic
 
   FraudScoringFunctionArn:
     Description: ARN da Lambda

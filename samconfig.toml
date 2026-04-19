@@ -4,7 +4,6 @@ version = 0.1
 stack_name = "fraud-severless"
 resolve_s3 = true
 s3_prefix = "fraud-severless"
-region = "sa-east-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 image_repositories = ["FraudScoringFunction=856364871203.dkr.ecr.sa-east-1.amazonaws.com/fraudseverless6b734042/fraudscoringfunction5823c536repo"]

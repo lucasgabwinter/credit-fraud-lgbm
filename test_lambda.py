@@ -1,6 +1,6 @@
 import json
-from src.lambda_handler import lambda_handler
 from unittest.mock import Mock, patch
+from src.lambda_handler import lambda_handler
 
 event = {
     "Records": [
@@ -43,9 +43,11 @@ event = {
     ]
 }
 with patch("src.lambda_handler.get_table") as mock_get_table:
-    mock_table = Mock()
-    mock_get_table.return_value = mock_table
+    with patch("src.lambda_handler.publish_fraud_alert") as mock_publish_alert:
+        mock_table = Mock()
+        mock_get_table.return_value = mock_table
 
-    result = lambda_handler(event, None)
-    print(result)
-    json.dumps(result)
+        result = lambda_handler(event, None)
+        print(result)
+        json.dumps(result)
+        mock_publish_alert.assert_called_once()

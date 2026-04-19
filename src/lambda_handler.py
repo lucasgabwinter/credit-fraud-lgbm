@@ -1,12 +1,15 @@
 import json
 import os
 from datetime import datetime
-from src.predict import prever_fraude
-from src.schemas import OprInput
 import boto3
 from decimal import Decimal
+from src.predict import prever_fraude
+from src.schemas import OprInput
 
 _TABLE = None
+_SNS_CLIENT = None
+
+
 def get_table():
     global _TABLE
     if _TABLE is None:
@@ -14,10 +17,41 @@ def get_table():
         _TABLE = dynamodb.Table(os.environ["RESULTS_TABLE_NAME"])
     return _TABLE
 
+
+def get_sns_client():
+    global _SNS_CLIENT
+    if _SNS_CLIENT is None:
+        _SNS_CLIENT = boto3.client("sns")
+    return _SNS_CLIENT
+
+
 def to_dynamodb_item(value):
     return json.loads(json.dumps(value), parse_float=Decimal)
 
+
+def publish_fraud_alert(result_item):
+    topic_arn = os.environ.get("SNS_TOPIC_ARN")
+    if not topic_arn:
+        return
+
+    message = {
+        "transaction_id": result_item["transaction_id"],
+        "fraud_score": result_item["fraud_score"],
+        "prediction": result_item["prediction"],
+        "threshold": result_item["threshold"],
+        "model_version": result_item["model_version"],
+        "processed_at": result_item["processed_at"],
+    }
+
+    get_sns_client().publish(
+        TopicArn=topic_arn,
+        Subject=f"Alerta de fraude detectada: {result_item['transaction_id']}",
+        Message=json.dumps(message),
+    )
+
+
 MODEL_VERSION = "v1"
+
 
 def lambda_handler(event, context):
     table = get_table()
@@ -56,6 +90,9 @@ def lambda_handler(event, context):
             "model_version": MODEL_VERSION,
             "processed_at": item["processed_at"]
         })
+
+        if resultados[-1]["prediction"] == "fraude":
+            publish_fraud_alert(resultados[-1])
 
     # Resposta 
     return {
