@@ -14,38 +14,8 @@ O fluxo cobre:
 - persistência dos resultados no DynamoDB
 - envio de alerta por e-mail via SNS quando a predição for `fraude`
 
-```mermaid
-flowchart LR
-    subgraph Training["Offline training"]
-        T1["Notebook<br/>training and validation"]
-        T2["Model artifacts<br/>model, features, threshold, version"]
-        T1 --> T2
-    end
-
-    subgraph Ingestion["Event ingestion"]
-        I1["Transaction simulator<br/>local producer"]
-        Q1["Amazon SQS<br/>transaction queue"]
-        I1 --> Q1
-    end
-
-    subgraph Scoring["Fraud scoring"]
-        L1["AWS Lambda<br/>scoring function"]
-        R1["Inference layer<br/>predict.py"]
-        Q1 --> L1
-        L1 --> R1
-    end
-
-    subgraph Outputs["Outputs and notification"]
-        D1["Amazon DynamoDB<br/>scoring results"]
-        S1["Amazon SNS<br/>fraud alerts"]
-        E1["Email subscriber"]
-        L1 --> D1
-        L1 --> S1
-        S1 --> E1
-    end
-
-    T2 -. load artifacts .-> R1
-```
+## Architecture
+![Architecture](images/architecture.png)
 
 ## Objetivo
 
