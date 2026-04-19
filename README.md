@@ -4,6 +4,8 @@ Production-style fraud detection pipeline built with LightGBM and AWS serverless
 
 This project demonstrates an end-to-end machine learning workflow designed for practical backend and MLOps scenarios: local API inference, asynchronous cloud processing with SQS and Lambda, result storage in DynamoDB, and e-mail alerts through SNS.
 
+![Result-sns](images/result_email.png)
+
 ## Descrição
 
 Este projeto implementa um pipeline completo de detecção de fraude em transações financeiras usando LightGBM, com foco em inferência operacional e arquitetura serverless na AWS.
