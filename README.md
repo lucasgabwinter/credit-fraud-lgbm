@@ -1,30 +1,24 @@
 # Credit Fraud Detection with LightGBM
 
-Event-driven fraud detection system using AWS serverless architecture (SQS, Lambda, DynamoDB, SNS) with LightGBM for real-time scoring.
+Production-style fraud detection pipeline built with LightGBM and AWS serverless services, covering model training, real-time scoring, event-driven processing, persistence, and alerting.
 
-pt(br):
-Este projeto implementa um pipeline completo de detecção de fraude em transações financeiras usando LightGBM.
+This project demonstrates an end-to-end machine learning workflow designed for practical backend and MLOps scenarios: local API inference, asynchronous cloud processing with SQS and Lambda, result storage in DynamoDB, and e-mail alerts through SNS.
 
-O fluxo cobre:
+## Descrição
 
-- exploração e treinamento do modelo a partir da base de dados
+Este projeto implementa um pipeline completo de detecção de fraude em transações financeiras usando LightGBM, com foco em inferência operacional e arquitetura serverless na AWS.
+
+### Principais entregas
+
+- treinamento e avaliação do modelo a partir da base `creditcard.csv`
 - persistência dos artefatos de inferência
-- API local com FastAPI
-- processamento assíncrono na AWS com SQS e Lambda
+- API local com FastAPI para testes e desenvolvimento
+- processamento assíncrono com SQS e Lambda
 - persistência dos resultados no DynamoDB
-- envio de alerta por e-mail via SNS quando a predição for `fraude`
+- alerta por e-mail via SNS quando a predição for `fraude`
 
 ## Architecture
 ![Architecture](images/architecture.png)
-
-## Objetivo
-
-O objetivo do projeto é receber um conjunto de features já transformadas de uma transação, calcular a probabilidade de fraude com um modelo LightGBM e executar ações operacionais a partir do resultado.
-
-O projeto foi estruturado para suportar tanto:
-
-- inferência local, para desenvolvimento e testes
-- inferência em ambiente serverless na AWS, para processamento assíncrono em produção
 
 ## Arquitetura
 
@@ -40,7 +34,7 @@ Os principais componentes são:
 
 ## Pipeline do processo
 
-### 1. Treinamento do modelo
+### 1. Treinamento e geração de artefatos
 
 O processo começa no notebook [notebooks/caderno.ipynb](./notebooks/caderno.ipynb), onde a base `creditcard.csv` é analisada e o modelo LightGBM é treinado.
 
@@ -57,9 +51,9 @@ Ao final do treinamento, são gerados os artefatos usados na inferência:
 - `artifacts/colunas_modelo.pkl`
 - `artifacts/threshold.pkl`
 
-### 2. Inferência local
+### 2. Camada de inferência compartilhada
 
-A inferência local usa os artefatos persistidos para calcular:
+A inferência usa os artefatos persistidos para calcular:
 
 - `prob_fraude`: probabilidade estimada de fraude
 - `resultado`: `fraude` ou `nao_fraude`, com base no threshold salvo
@@ -83,7 +77,7 @@ No `POST /predict`, a API:
 
 1. valida o payload com Pydantic
 2. chama a função `prever_fraude`
-3. retorna a probabilidade e a classe prevista
+3. retorna probabilidade, classe prevista e threshold utilizado
 
 ### 4. Processamento assíncrono na AWS
 
@@ -96,24 +90,6 @@ Em produção, o processamento acontece de forma assíncrona:
 5. o resultado é salvo no DynamoDB
 6. se a predição for `fraude`, a Lambda publica uma mensagem no SNS
 7. o SNS envia um alerta por e-mail para a inscrição confirmada
-
-### 5. Persistência dos resultados
-
-Os resultados são gravados na tabela DynamoDB com informações como:
-
-- `transaction_id`
-- `features`
-- `fraud_score`
-- `prediction`
-- `threshold`
-- `model_version`
-- `processed_at`
-
-### 6. Alerta por e-mail
-
-Quando a predição final é `fraude`, a Lambda envia uma mensagem para o tópico SNS.
-
-O tópico pode ter uma inscrição do tipo `email`, permitindo o envio de um alerta operacional para análise manual ou resposta a incidente.
 
 ## Infraestrutura AWS
 
@@ -128,6 +104,18 @@ Os recursos principais são:
 
 O uso de container image foi adotado porque o LightGBM depende de biblioteca nativa do sistema operacional. O `Dockerfile` instala `libgomp`, necessária para o carregamento correto do modelo em ambiente Lambda.
 
+### Dados persistidos
+
+Os resultados são gravados no DynamoDB com campos como:
+
+- `transaction_id`
+- `features`
+- `fraud_score`
+- `prediction`
+- `threshold`
+- `model_version`
+- `processed_at`
+
 ## Estrutura do projeto
 
 ```text
@@ -141,6 +129,8 @@ O uso de container image foi adotado porque o LightGBM depende de biblioteca nat
 ├── events/
 │   ├── event.json
 │   └── sqs_event.json
+├── images/
+│   └── architecture.png
 ├── notebooks/
 │   └── caderno.ipynb
 ├── src/
@@ -221,27 +211,18 @@ Depois disso, a API pode ser acessada em:
 
 ## Como testar a Lambda localmente
 
-### Build da aplicação com SAM
-
 ```bash
 sam build
-```
-
-### Invocação local com evento de exemplo
-
-```bash
 sam local invoke FraudScoringFunction -e events/sqs_event.json
 ```
 
 ## Como fazer deploy na AWS
 
-### Deploy guiado
-
 ```bash
 sam deploy --guided
 ```
 
-### Deploy com e-mail para alertas SNS
+Para configurar o alerta por e-mail via SNS:
 
 ```bash
 sam deploy --parameter-overrides AlertEmail=seu-email@exemplo.com
@@ -249,7 +230,7 @@ sam deploy --parameter-overrides AlertEmail=seu-email@exemplo.com
 
 Depois do deploy, é necessário confirmar a inscrição recebida por e-mail do SNS para que os alertas sejam entregues.
 
-## Como testar o fluxo em produção
+## Como validar o fluxo em produção
 
 Após o deploy, o fluxo pode ser testado assim:
 
@@ -318,7 +299,7 @@ O corpo da mensagem enviada ao SQS deve ter este formato:
 - o DynamoDB recebe números como `Decimal` para compatibilidade com o `boto3`
 - o retorno da Lambda é convertido para tipos serializáveis em JSON
 
-## Próximos passos possíveis
+## Próximos passos
 
 - adicionar testes automatizados com `pytest`
 - adicionar observabilidade com CloudWatch Logs estruturados
