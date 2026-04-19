@@ -34,19 +34,23 @@ def publish_fraud_alert(result_item):
     if not topic_arn:
         return
 
-    message = {
-        "transaction_id": result_item["transaction_id"],
-        "fraud_score": result_item["fraud_score"],
-        "prediction": result_item["prediction"],
-        "threshold": result_item["threshold"],
-        "model_version": result_item["model_version"],
-        "processed_at": result_item["processed_at"],
-    }
+    subject = f"Alerta de fraude detectada: {result_item['transaction_id']}"
+
+    message = f"""
+    Alerta de fraude detectada!
+    Código da operação: {result_item['transaction_id']}
+    Resultado do modelo: {result_item['prediction']}
+    Probabilidade de Fraude: {result_item['fraud_score']:.4f}
+    Threshold: {result_item['threshold']:.4f}
+    Versão do modelo: {result_item['model_version']}
+    Processado em: {result_item['processed_at']}
+    Modelo e sistemas criados por Lucas Winter.
+    """.strip()
 
     get_sns_client().publish(
         TopicArn=topic_arn,
-        Subject=f"Alerta de fraude detectada: {result_item['transaction_id']}",
-        Message=json.dumps(message),
+        Subject=subject,
+        Message=message,
     )
 
 
