@@ -1,5 +1,8 @@
 # Credit Fraud Detection with LightGBM
 
+Event-driven fraud detection system using AWS serverless architecture (SQS, Lambda, DynamoDB, SNS) with LightGBM for real-time scoring.
+
+pt(br):
 Este projeto implementa um pipeline completo de detecção de fraude em transações financeiras usando LightGBM.
 
 O fluxo cobre:
